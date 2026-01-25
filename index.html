@@ -1,262 +1,481 @@
 <!doctype html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Emiliia Lebedeva | Rhythmic Gymnast & Research Student</title>
+  <meta charset="utf-8">
+  <title>Emiliia Lebedeva | Rhythmic Gymnast & Research Student</title>
+  
   <meta name="description" content="Athletic and academic portfolio of Emiliia Lebedeva, Rhythmic Gymnast and Research Student.">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="format-detection" content="telephone=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  
+  <!-- Favicons -->
   <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
-  <link rel="manifest" href="images/site.webmanifest">
+  <link rel="manifest" href="site.webmanifest">
   <link rel="shortcut icon" href="images/favicon.ico">
-  <link rel="preconnect" href="https://cdn.tailwindcss.com">
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <meta name="theme-color" content="#1d4ed8">
+  
+  <!-- Main Styles -->
   <style>
-    /* Critical CSS for fast first paint */
-    body { margin: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #f3f4f6; color: #111827; -webkit-font-smoothing: antialiased; }
+    /* CRITICAL CSS INLINED FOR 0ms FOUC */
+    :root {
+      --primary-color: #1d4ed8; /* blue-700 */
+      --primary-hover: #1e40af; /* blue-800 */
+      --accent-color: #f59e0b; /* amber-500 */
+      --text-dark: #111827; /* gray-900 */
+      --text-medium: #374151; /* gray-700 */
+      --text-light: #6b7280; /* gray-500 */
+      --bg-light: #f9fafb; /* gray-50 */
+      --bg-darker: #f3f4f6; /* gray-100 */
+      --white: #ffffff;
+      --success: #16a34a; /* green-600 */
+      --error: #ef4444; /* red-500 */
+      --border-radius: 0.75rem; /* rounded-xl */
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    
+    /* Reset & Base */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-family);
+      background-color: var(--bg-darker);
+      color: var(--text-dark);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      /* Ensure body is hidden until styles are parsed if JS fails, though style tag blocks rendering */
+    }
     img { max-width: 100%; height: auto; display: block; }
-    h1 { font-size: 2.25rem; font-weight: 700; line-height: 1.1; }
-    .max-w-7xl { max-width: 80rem; margin-left: auto; margin-right: auto; padding-left: 1rem; padding-right: 1rem; }
+    h1, h2, h3, h4, h5, h6 { margin: 0; line-height: 1.2; }
+    ul { list-style: none; padding: 0; margin: 0; }
+    a { text-decoration: none; color: inherit; }
+    
+    /* Layout Utilities */
+    .container { max-width: 80rem; margin: 0 auto; padding: 0 1rem; }
+    .section { padding: 4rem 0; }
+    .grid { display: grid; gap: 1.5rem; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .grid-3 { grid-template-columns: 1fr; }
+    .grid-4 { grid-template-columns: 1fr; }
+    @media (min-width: 768px) {
+      .grid-2 { grid-template-columns: 1fr 1fr; }
+      .grid-3 { grid-template-columns: repeat(3, 1fr); }
+      .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (min-width: 1024px) {
+      .grid-4 { grid-template-columns: repeat(4, 1fr); }
+    }
+    .flex { display: flex; }
+    .flex-col { flex-direction: column; }
+    .items-center { align-items: center; }
+    .justify-center { justify-content: center; }
+    .justify-between { justify-content: space-between; }
+    .gap-4 { gap: 1rem; }
+    .gap-6 { gap: 1.5rem; }
+    .gap-8 { gap: 2rem; }
+    .gap-12 { gap: 3rem; }
+    .text-center { text-align: center; }
+    .text-light { color: var(--text-light); }
+    .bg-light { background-color: var(--bg-light); }
+    .mt-2 { margin-top: 0.5rem; }
+    .mt-3 { margin-top: 0.75rem; }
+    .mt-4 { margin-top: 1rem; }
+    .mt-6 { margin-top: 1.5rem; }
+    .mt-8 { margin-top: 2rem; }
+    .mt-auto { margin-top: auto; }
+    .mb-2 { margin-bottom: 0.5rem; }
+    .mb-3 { margin-bottom: 0.75rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .mb-6 { margin-bottom: 1.5rem; }
+    .mb-8 { margin-bottom: 2rem; }
+    .mr-1 { margin-right: 0.25rem; }
+    .mr-2 { margin-right: 0.5rem; }
+    .mr-3 { margin-right: 0.75rem; }
+    .w-full { width: 100%; }
+    .rounded-xl { border-radius: var(--border-radius); }
+    .shadow-md { box-shadow: var(--shadow); }
+    .space-y-1 > * + * { margin-top: 0.25rem; }
+    .space-y-4 > * + * { margin-top: 1rem; }
+    
+    /* Navigation */
+    .navbar { background: var(--white); box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: relative; z-index: 50; }
+    .nav-container { display: flex; justify-content: space-between; align-items: center; padding: 1rem; max-width: 80rem; margin: 0 auto; }
+    .nav-logo { font-size: 1.25rem; font-weight: 600; color: var(--text-dark); }
+    .nav-toggle { display: block; background: none; border: none; font-size: 1.25rem; color: var(--text-light); cursor: pointer; }
+    .nav-menu { display: none; gap: 1rem; }
+    .nav-link { color: var(--text-light); padding: 0.75rem 0.5rem; border-radius: 0.375rem; transition: all 0.2s; }
+    .nav-link:hover { color: var(--text-dark); background: var(--bg-light); }
+    @media (min-width: 768px) { .nav-toggle { display: none; } .nav-menu { display: flex; } }
+    
+    /* Mobile Menu */
+    .mobile-menu { display: none; position: absolute; top: 100%; left: 0; width: 100%; background: var(--white); border-top: 1px solid var(--bg-darker); box-shadow: var(--shadow); z-index: 49; flex-direction: column; padding: 0.5rem 1rem; }
+    .mobile-menu.is-open { display: flex; }
+    .mobile-link { display: block; padding: 0.75rem 0.5rem; color: var(--text-light); border-radius: 0.375rem; }
+    .mobile-link:hover { color: var(--text-dark); background: var(--bg-light); }
+    .mobile-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 40; }
+    .mobile-overlay.is-open { display: block; }
+    
+    /* Hero Section */
+    .hero { background: linear-gradient(to right, #dbeafe, var(--white)); padding: 4rem 1rem; }
+    .hero-content { display: flex; flex-direction: column; gap: 2rem; }
+    .hero h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero-subtitle { font-size: 1.25rem; color: var(--primary-color); font-weight: 600; margin-bottom: 1rem; }
+    .hero-text { font-size: 1.125rem; color: var(--text-medium); margin-bottom: 2rem; }
+    /* Updated BTN: Flex for perfect centering */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; background: var(--primary-color); color: var(--white); padding: 0.75rem 2rem; border-radius: 0.5rem; font-weight: 600; transition: background 0.2s; cursor: pointer; border: none; text-align: center; }
+    .btn:hover { background: var(--primary-hover); }
+    .btn:disabled { background: var(--text-light); cursor: not-allowed; }
+    .hero-image img { border-radius: 0.75rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); width: 100%; }
+    @media (min-width: 768px) {
+      .hero-wrapper { display: flex; align-items: center; gap: 3rem; }
+      /* Updated Hero Content: Centered vertically and horizontally relative to its column */
+      .hero-content { flex: 1; align-items: center; text-align: center; justify-content: center; }
+      .hero-image { flex: 1; }
+    }
+    
+    /* Sections */
+    .section-title { font-size: 1.875rem; font-weight: 700; margin-bottom: 2rem; display: flex; align-items: center; color: var(--text-dark); }
+    .section-title.center { justify-content: center; }
+    .section-title i { margin-right: 0.75rem; }
+    
+    /* About / Profile */
+    .list-check { display: flex; flex-direction: column; gap: 1rem; }
+    .list-check li { position: relative; }
+    /* Ensure columns in About grid stretch to equal height */
+    .about-col { display: flex; flex-direction: column; height: 100%; }
+    .text-blue { color: var(--primary-color); }
+    .text-amber { color: var(--accent-color); }
+    .text-green { color: var(--success); }
+    
+    /* Cards */
+    .card { background: var(--white); padding: 1.5rem; border-radius: var(--border-radius); box-shadow: var(--shadow); height: 100%; }
+    .card-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; display: flex; align-items: center; color: var(--text-dark); }
+    .card-title i { margin-right: 0.5rem; }
+    .border-top-amber { border-top: 4px solid var(--accent-color); }
+    .border-top-blue { border-top: 4px solid var(--primary-color); }
+    .border-top-green { border-top: 4px solid var(--success); }
+    
+    /* Portfolio / Goals */
+    .bg-gradient { background: linear-gradient(to right, #eff6ff, var(--white)); }
+    .objective-card { text-align: center; }
+    
+    /* Footer */
+    footer { background: var(--white); padding: 2rem 0; border-top: 1px solid var(--bg-darker); margin-top: 2rem; text-align: center; color: var(--text-light); }
+
+    /* LOADER & PRELOADER */
+    #loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #ffffff !important;
+      z-index: 2147483647; /* Max Z-Index */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(29, 78, 216, 0.2);
+      border-left-color: #1d4ed8;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    /* Social Icons - Official Brand Colors */
+    .social-icon-instagram {
+      background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+      display: inline-block;
+    }
+    .social-icon-telegram {
+      color: #24A1DE;
+    }
+    .social-icon-tiktok {
+      color: #000000;
+      text-shadow: 2px 2px 0px #FE2C55, -2px -2px 0px #25F4EE;
+    }
+
+    /* Social Icons Sizing & Animation Utilities */
+    .text-6xl { font-size: 3.75rem; line-height: 1; }
+    .text-7xl { font-size: 4.5rem; line-height: 1; }
+    .transition-transform { transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1); }
+    .hover-scale-125:hover { transform: scale(1.25); }
+
+    /* CLEANED UP: No more body.loading dependency */
+    /* Content hiding is now handled by inline styles on #content-wrapper */
+
+    /* Fade In Animation */
+    .fade-in-section {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 1s ease-out, transform 1s ease-out;
+      will-change: opacity, transform;
+    }
+    .fade-in-section.is-visible {
+      opacity: 1;
+      transform: none;
+    }
   </style>
 </head>
-<body class="bg-gray-100 text-gray-900 overflow-x-hidden antialiased">
-<nav class="bg-white shadow relative z-50">
-  <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between bg-white relative z-50">
-    <a href="#hero" class="text-xl font-semibold">Emiliia Lebedeva</a>
-    <button id="mobile-menu-btn" class="md:hidden text-gray-600 hover:text-gray-900 focus:outline-none min-h-[44px] flex items-center" aria-label="Open menu" aria-expanded="false">
-      <i class="fas fa-bars text-lg transition-transform duration-300"></i>
-    </button>
-    <div class="hidden md:flex space-x-4">
-      <a href="#about" class="text-gray-600 hover:text-gray-900 active:bg-gray-100 rounded-lg py-3 px-2 inline-block transition-colors">Profile</a>
-      <a href="#services" class="text-gray-600 hover:text-gray-900 active:bg-gray-100 rounded-lg py-3 px-2 inline-block transition-colors">Achievements</a>
-      <a href="#portfolio" class="text-gray-600 hover:text-gray-900 active:bg-gray-100 rounded-lg py-3 px-2 inline-block transition-colors">Goals</a>
-      <a href="#skills" class="text-gray-600 hover:text-gray-900 active:bg-gray-100 rounded-lg py-3 px-2 inline-block transition-colors">Skills</a>
-      <a href="#contacts" class="text-gray-600 hover:text-gray-900 active:bg-gray-100 rounded-lg py-3 px-2 inline-block transition-colors">Contact</a>
-    </div>
+<body>
+  <div id="loader" style="opacity: 1; visibility: visible;">
+    <div class="spinner"></div>
   </div>
-  <div id="mobile-menu" class="md:hidden bg-white border-t border-gray-100 absolute w-full left-0 shadow-lg transition-all duration-300 ease-out -translate-y-2 opacity-0 invisible origin-top">
-    <div class="px-4 pt-2 pb-4 flex flex-col space-y-2">
-      <a href="#about" class="block py-3 px-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100 rounded min-h-[44px] flex items-center transition-colors">Profile</a>
-      <a href="#services" class="block py-3 px-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100 rounded min-h-[44px] flex items-center transition-colors">Achievements</a>
-      <a href="#portfolio" class="block py-3 px-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100 rounded min-h-[44px] flex items-center transition-colors">Goals</a>
-      <a href="#skills" class="block py-3 px-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100 rounded min-h-[44px] flex items-center transition-colors">Skills</a>
-      <a href="#contacts" class="block py-3 px-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100 rounded min-h-[44px] flex items-center transition-colors">Contact</a>
-    </div>
-  </div>
-</nav>
-<div id="mobile-overlay" class="fixed inset-0 bg-black/50 z-40 hidden opacity-0 transition-opacity duration-300"></div>
 
-<main class="w-full">
-  <section id="hero" class="py-16 bg-gradient-to-r from-blue-50 to-white">
-    <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center gap-12">
-      <div class="w-full md:w-1/2 text-left">
-        <h1 class="text-4xl md:text-5xl font-bold mb-4 text-gray-900">Emiliia Lebedeva</h1>
-        <p class="text-xl text-blue-700 font-semibold mb-4">Rhythmic Gymnast • Master of Sport • Research Student</p>
-        <p class="text-lg text-gray-600 mb-8">Balancing elite athletic performance with academic excellence | Scholarship Candidate for Universities</p>
-        <a href="#portfolio" class="inline-block px-8 py-3 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition font-semibold">
-          <i class="fa-regular fa-file-lines mr-2"></i>View Athletic & Academic Portfolio
-        </a>
-      </div>
-      <div class="w-full md:w-1/2">
-        <img src="Foto/portrait.jpg" alt="Emiliia Lebedeva, rhythmic gymnast and research student" loading="lazy" decoding="async" width="600" height="700" class="w-full h-auto rounded-xl shadow-lg object-cover blur-sm transition duration-500" onload="this.classList.remove('blur-sm')">
-      </div>
+  <!-- WRAPPER: Inline style guarantees hidden content (Nuclear Option) -->
+  <div id="content-wrapper" style="opacity: 0; visibility: hidden; transition: opacity 0.8s ease;">
+  
+   <!-- Navigation -->
+   <nav id="main-nav" class="navbar">
+     <div class="nav-container">
+       <a href="#hero" class="nav-logo">Emiliia Lebedeva</a>
+       <button class="nav-toggle" aria-label="Menu" id="mobile-menu-btn">
+         <i class="fas fa-bars"></i>
+       </button>
+       <div class="nav-menu">
+      <a href="#about" class="nav-link">Profile</a>
+      <a href="#services" class="nav-link">Achievements</a>
+      <a href="#portfolio" class="nav-link">Goals</a>
+      <a href="#skills" class="nav-link">Skills</a>
+      <a href="#contacts" class="nav-link">Contact</a>
     </div>
-  </section>
+    </div>
+    
+    <!-- Mobile Menu (Moved inside nav for correct absolute positioning) -->
+    <div id="mobile-menu" class="mobile-menu">
+       <a href="#about" class="mobile-link">Profile</a>
+       <a href="#services" class="mobile-link">Achievements</a>
+       <a href="#portfolio" class="mobile-link">Goals</a>
+       <a href="#skills" class="mobile-link">Skills</a>
+       <a href="#contacts" class="mobile-link">Contact</a>
+    </div>
+  </nav>
+  
+  <div id="mobile-overlay" class="mobile-overlay"></div>
+ 
+   <main>
+   <!-- Hero Section -->
+   <section id="hero" class="hero">
+     <div class="container hero-wrapper">
+       <div class="hero-content">
+         <h1>Emiliia Lebedeva</h1>
+         <p class="hero-subtitle">
+           Rhythmic Gymnast • Master of Sport • Research Student
+         </p>
+         <p class="hero-text">
+           Balancing elite athletic performance with academic excellence | Scholarship Candidate for Universities
+         </p>
+         <a href="#portfolio" class="btn">
+           <i class="fa-regular fa-file-lines"></i> View Athletic & Academic Portfolio
+         </a>
+       </div>
+       <div class="hero-image">
+         <img src="Foto/portrait.jpg" alt="Emiliia Lebedeva" width="600" height="700" class="fade-in-section">
+       </div>
+     </div>
+   </section>
 
-  <section id="about" class="py-16">
-    <div class="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-12">
-      <div class="flex flex-col h-full">
-        <h2 class="text-3xl font-bold mb-6 flex items-center text-gray-900">
-          <i class="fa-solid fa-medal text-amber-500 mr-3"></i>Athletic Profile
+  <!-- About Section -->
+  <section id="about" class="section">
+    <div class="container grid grid-2">
+      <div class="flex flex-col about-col">
+        <h2 class="section-title">
+          <i class="fa-solid fa-medal text-amber"></i>Athletic Profile
         </h2>
-        <ul class="space-y-4 text-gray-700 flex-grow">
-          <li><strong class="text-blue-700">Russian Master of Sport</strong> in Rhythmic Gymnastics</li>
+        <ul class="list-check">
+          <li><strong class="text-blue">Russian Master of Sport</strong> in Rhythmic Gymnastics</li>
           <li><strong>5-time Moscow Champion</strong> (Club Division, 2020–2024)</li>
           <li><strong>Multiple winner</strong> of All-Russian competitions</li>
           <li>Training: 25+ hours weekly in Moscow</li>
           <li>Born: December 22, 2008, Ufa, Russia</li>
         </ul>
-        <img src="Foto/competition.jpg" alt="Emiliia Lebedeva at rhythmic gymnastics competition" loading="lazy" decoding="async" width="600" height="400" class="w-full h-64 md:h-80 rounded-xl shadow-md object-cover mt-6 blur-sm transition duration-500" onload="this.classList.remove('blur-sm')">
+        <img src="Foto/competition.jpg" alt="Competition" class="mt-6 rounded-xl shadow-md mt-auto fade-in-section">
       </div>
-      <div class="flex flex-col h-full">
-        <h2 class="text-3xl font-bold mb-6 flex items-center text-gray-900">
-          <i class="fa-solid fa-flask text-blue-700 mr-3"></i>Academic & Research Profile
+      <div class="flex flex-col about-col">
+        <h2 class="section-title">
+          <i class="fa-solid fa-flask text-blue"></i>Academic & Research Profile
         </h2>
-        <ul class="space-y-4 text-gray-700 flex-grow">
+        <ul class="list-check">
           <li>Active participant in subject Olympiads (Math, Biology, Ecology)</li>
-          <li>Completed experimental course in <strong class="text-blue-700">Ecology</strong> with laboratory focus</li>
+          <li>Completed experimental course in <strong class="text-blue">Ecology</strong> with laboratory focus</li>
           <li>Author of research project: <em>"Microbiological Air Quality Control in Indoor Environments"</em></li>
           <li>Skills: Scientific writing, data analysis, experimental design</li>
         </ul>
-        <img src="Foto/laboratory.jpg" alt="Emiliia Lebedeva conducting ecological research" loading="lazy" decoding="async" width="600" height="400" class="w-full h-64 md:h-80 rounded-xl shadow-md object-cover mt-6 blur-sm transition duration-500" onload="this.classList.remove('blur-sm')">
+        <img src="Foto/laboratory.jpg" alt="Laboratory" class="mt-6 rounded-xl shadow-md mt-auto fade-in-section">
       </div>
     </div>
   </section>
 
-  <section id="services" class="py-16 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4">
-    <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">Key Achievements</h2>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-amber-500">
-        <h3 class="text-xl font-bold mb-3 flex items-center text-gray-900">
-          <i class="fa-solid fa-trophy text-amber-500 mr-2"></i>Athletic Excellence
+  <!-- Services (Achievements) -->
+  <section id="services" class="section bg-light">
+    <div class="container">
+    <h2 class="section-title center">Key Achievements</h2>
+    <div class="grid grid-3">
+      <div class="card border-top-amber">
+        <h3 class="card-title">
+          <i class="fa-solid fa-trophy text-amber"></i>Athletic Excellence
         </h3>
-        <p class="text-gray-700">Master of Sport title – Russia's official recognition of elite athletic achievement</p>
+        <p>Master of Sport title – Russia's official recognition of elite athletic achievement</p>
       </div>
-      <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-500">
-        <h3 class="text-xl font-bold mb-3 flex items-center text-gray-900">
-          <i class="fa-solid fa-vials text-blue-700 mr-2"></i>Research Experience
+      <div class="card border-top-blue">
+        <h3 class="card-title">
+          <i class="fa-solid fa-vials text-blue"></i>Research Experience
         </h3>
-        <p class="text-gray-700">Designed and defended original microbiological research project at 15</p>
+        <p>Designed and defended original microbiological research project at 15</p>
       </div>
-      <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-green-500">
-        <h3 class="text-xl font-bold mb-3 flex items-center text-gray-900">
-          <i class="fa-solid fa-scale-balanced text-green-600 mr-2"></i>Balance & Discipline
+      <div class="card border-top-green">
+        <h3 class="card-title">
+          <i class="fa-solid fa-scale-balanced text-green"></i>Balance & Discipline
         </h3>
-        <p class="text-gray-700">Maintaining top-tier athletic training alongside rigorous academic schedule</p>
+        <p>Maintaining top-tier athletic training alongside rigorous academic schedule</p>
       </div>
     </div>
     </div>
   </section>
 
-  <section id="portfolio" class="py-16 bg-gradient-to-r from-blue-50 to-white">
-    <div class="max-w-7xl mx-auto px-4">
-    <h2 class="text-3xl font-bold mb-8 text-center flex justify-center items-center text-gray-900">
-      <i class="fa-solid fa-bullseye text-blue-700 mr-3"></i>University & Career Objectives
+  <!-- Portfolio (Goals) -->
+  <section id="portfolio" class="section bg-gradient">
+    <div class="container">
+    <h2 class="section-title center">
+      <i class="fa-solid fa-bullseye text-blue"></i>University & Career Objectives
     </h2>
-    <div class="max-w-3xl mx-auto text-center mb-12">
-      <p class="text-lg text-gray-700 mb-6">I seek to combine my athletic discipline with scientific curiosity in a university environment.</p>
+    <div class="text-center mb-8">
+      <p class="hero-text">I seek to combine my athletic discipline with scientific curiosity in a university environment.</p>
     </div>
-    <div class="grid md:grid-cols-3 gap-6 text-center mb-8">
-      <div class="bg-white p-6 rounded-xl shadow-sm">
-        <strong class="text-blue-700 block text-lg mb-2">Environmental Science</strong> Building on my ecology research
+    <div class="grid grid-3 text-center mb-8">
+      <div class="card objective-card">
+        <strong class="text-blue block mb-2">Environmental Science</strong> Building on my ecology research
       </div>
-      <div class="bg-white p-6 rounded-xl shadow-sm">
-        <strong class="text-blue-700 block text-lg mb-2">Sports Science</strong> Applying firsthand athletic experience
+      <div class="card objective-card">
+        <strong class="text-blue block mb-2">Sports Science</strong> Applying firsthand athletic experience
       </div>
-      <div class="bg-white p-6 rounded-xl shadow-sm">
-        <strong class="text-blue-700 block text-lg mb-2">Biology</strong> Deepening laboratory research skills
+      <div class="card objective-card">
+        <strong class="text-blue block mb-2">Biology</strong> Deepening laboratory research skills
       </div>
     </div>
-    <p class="text-center text-gray-700 mt-8 max-w-3xl mx-auto">As a scholarship candidate, I offer: unique perspective as athlete-researcher, proven time management, and commitment to university community.</p>
+    <p class="text-center mt-8">As a scholarship candidate, I offer: unique perspective as athlete-researcher, proven time management, and commitment to university community.</p>
     </div>
   </section>
 
-  <section id="skills" class="py-16">
-    <div class="max-w-7xl mx-auto px-4">
-    <h2 class="text-3xl font-bold mb-8 text-center text-gray-900">
-      <i class="fa-regular fa-lightbulb text-amber-500 mr-2"></i>Transferable Skills
+  <!-- Skills -->
+  <section id="skills" class="section">
+    <div class="container">
+    <h2 class="section-title center">
+      <i class="fa-regular fa-lightbulb text-amber"></i>Transferable Skills
     </h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      <div class="bg-white p-5 rounded-lg shadow text-center border border-gray-100">
-        <h3 class="font-bold text-lg mb-2 text-gray-800">Discipline & Time Management</h3>
-        <p class="text-sm text-gray-600">25+ hours weekly training + academics</p>
+    <div class="grid grid-4">
+      <div class="card text-center">
+        <h3 class="font-bold mb-2">Discipline & Time Management</h3>
+        <p class="text-sm text-light">25+ hours weekly training + academics</p>
       </div>
-      <div class="bg-white p-5 rounded-lg shadow text-center border border-gray-100">
-        <h3 class="font-bold text-lg mb-2 text-gray-800">Resilience & Performance</h3>
-        <p class="text-sm text-gray-600">Competing under pressure at national level</p>
+      <div class="card text-center">
+        <h3 class="font-bold mb-2">Resilience & Performance</h3>
+        <p class="text-sm text-light">Competing under pressure at national level</p>
       </div>
-      <div class="bg-white p-5 rounded-lg shadow text-center border border-gray-100">
-        <h3 class="font-bold text-lg mb-2 text-gray-800">Research & Analysis</h3>
-        <p class="text-sm text-gray-600">From lab experiments to performance analytics</p>
+      <div class="card text-center">
+        <h3 class="font-bold mb-2">Research & Analysis</h3>
+        <p class="text-sm text-light">From lab experiments to performance analytics</p>
       </div>
-      <div class="bg-white p-5 rounded-lg shadow text-center border border-gray-100">
-        <h3 class="font-bold text-lg mb-2 text-gray-800">Leadership & Teamwork</h3>
-        <p class="text-sm text-gray-600">Club leadership, mentoring, collaboration</p>
+      <div class="card text-center">
+        <h3 class="font-bold mb-2">Leadership & Teamwork</h3>
+        <p class="text-sm text-light">Club leadership, mentoring, collaboration</p>
       </div>
     </div>
     </div>
   </section>
 
-  <section id="contacts" class="py-16">
-    <div class="max-w-7xl mx-auto px-4">
-    <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">Contact</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-      <form id="contact-form" class="bg-white rounded-xl shadow p-6 space-y-4" novalidate>
-        <h3 class="text-xl font-bold mb-4 flex items-center">
-          <i class="fa-solid fa-code mr-2 text-blue-700"></i>Demo Contact Form
-        </h3>
-        <div>
-          <label class="block text-sm font-semibold mb-1" for="name">Name</label>
-          <input id="name" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="Your Name">
-          <p id="name-error" class="text-red-500 text-sm mt-1 hidden"></p>
-        </div>
-        <div>
-          <label class="block text-sm font-semibold mb-1" for="email">Email</label>
-          <input id="email" type="email" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="you@example.com">
-          <p id="email-error" class="text-red-500 text-sm mt-1 hidden"></p>
-        </div>
-        <div>
-          <label class="block text-sm font-semibold mb-1" for="message">Message</label>
-          <textarea id="message" rows="4" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="Your inquiry..."></textarea>
-          <p id="message-error" class="text-red-500 text-sm mt-1 hidden"></p>
-        </div>
-        <button type="button" id="submit-btn" class="w-full px-6 py-3 bg-gray-400 text-white font-semibold rounded-lg transition flex items-center justify-center gap-2 cursor-not-allowed" disabled>
-          <i class="fa-regular fa-paper-plane"></i>
-          Send Demo Message
-        </button>
-        
-        <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <div class="flex items-start">
-            <i class="fa-solid fa-circle-info text-blue-600 mt-1 mr-3 text-lg"></i>
-            <div>
-              <p class="font-semibold text-blue-800 mb-2">About this demo form:</p>
-              <ul class="text-sm text-blue-700 space-y-1">
-                <li>• This is a demonstration version for portfolio purposes</li>
-                <li>• Messages are not actually sent to avoid spam filters</li>
-                <li>• For real inquiries, please use the direct email below</li>
-                <li>• You can also message me directly on social media</li>
-              </ul>
-              <p class="text-xs text-blue-600 mt-3">
-                Technical note: Browser security restrictions prevent direct email sending from static websites.
-              </p>
-            </div>
-          </div>
-        </div>
-      </form>
-      <div class="space-y-4 text-gray-700">
-        <h3 class="text-xl font-bold mb-4">For University Inquiries</h3>
-        <p class="font-semibold text-lg">Email: <a href="mailto:dido@keemail.me" class="text-blue-700 hover:underline">dido@keemail.me</a></p>
-        <p class="mt-4">
+  <!-- Contact Section -->
+  <section id="contacts" class="section bg-light">
+    <div class="container">
+      <h2 class="section-title center">Contact</h2>
+      <div class="flex flex-col items-center text-center">
+        <h3 class="text-2xl font-bold mb-6">For University Inquiries</h3>
+        <p class="font-semibold text-xl mb-4">Email: <a href="mailto:dido@keemail.me" class="text-blue hover:underline">dido@keemail.me</a></p>
+        <p class="mb-4">
           <strong>Preferred contact method:</strong>
           <span class="inline-block ml-2 px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">
             <i class="fa-solid fa-envelope-circle-check mr-1"></i>Direct email
           </span>
         </p>
-        <p class="mt-2">Competition videos and academic transcript available upon request.</p>
-        <div class="mt-6">
-          <h4 class="font-bold mb-3">Training & Competition Media</h4>
-          <div class="flex space-x-4 text-3xl">
-            <a href="https://instagram.com/emiliiaswan" class="text-pink-600 hover:opacity-80 transition"><i class="fab fa-instagram"></i></a>
-            <a href="https://t.me/EmiliiaSwan" class="text-blue-700 hover:opacity-80 transition"><i class="fab fa-telegram"></i></a>
-            <a href="https://tiktok.com/@emiliiaswan" class="text-gray-800 hover:opacity-80 transition"><i class="fab fa-tiktok"></i></a>
+        <p class="mt-2 text-lg">Competition videos and academic transcript available upon request.</p>
+        
+        <div class="mt-10">
+          <h4 class="font-bold mb-6 text-xl">Training & Competition Media</h4>
+          <div class="flex gap-8 text-7xl justify-center">
+            <a href="https://www.instagram.com/emiliiaswan?igsh=aG44OHZoZHowcThh&utm_source=qr" target="_blank" class="social-icon-instagram hover-scale-125 transition-transform" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://t.me/EmiliiaSwan" target="_blank" class="social-icon-telegram hover-scale-125 transition-transform" aria-label="Telegram"><i class="fab fa-telegram"></i></a>
+            <a href="https://www.tiktok.com/@emiliiaswan?_r=1&_t=ZS-93CH3szChUr" target="_blank" class="social-icon-tiktok hover-scale-125 transition-transform" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
           </div>
         </div>
       </div>
     </div>
-    </div>
   </section>
-</main>
 
-<footer class="bg-white border-t mt-8">
-  <div class="max-w-7xl mx-auto px-4 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
-    <p class="text-gray-600">© 2024 Emiliia Lebedeva. Athletic-Academic Profile.</p>
-    <div class="flex items-center gap-4 text-xl text-gray-600">
-      <a href="https://instagram.com/emiliiaswan" class="hover:text-pink-600 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center"><i class="fab fa-instagram"></i></a>
-      <a href="https://t.me/EmiliiaSwan" class="hover:text-blue-700 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center"><i class="fab fa-telegram"></i></a>
-      <a href="https://tiktok.com/@emiliiaswan" class="hover:text-gray-900 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center"><i class="fab fa-tiktok"></i></a>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="flex flex-col items-center gap-4">
+        <div class="flex gap-6 text-6xl">
+           <a href="https://www.instagram.com/emiliiaswan?igsh=aG44OHZoZHowcThh&utm_source=qr" target="_blank" class="social-icon-instagram hover-scale-125 transition-transform" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+           <a href="https://t.me/EmiliiaSwan" target="_blank" class="social-icon-telegram hover-scale-125 transition-transform" aria-label="Telegram"><i class="fab fa-telegram"></i></a>
+           <a href="https://www.tiktok.com/@emiliiaswan?_r=1&_t=ZS-93CH3szChUr" target="_blank" class="social-icon-tiktok hover-scale-125 transition-transform" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+        </div>
+        <div>
+           <p>&copy; 2024 Emiliia Lebedeva. All rights reserved.</p>
+           <p class="text-sm mt-2">Designed for University Applications</p>
+        </div>
+      </div>
     </div>
-  </div>
-  <p class="text-sm text-gray-500 pb-6 text-center">
-    <i class="fa-solid fa-shield-check mr-1"></i>For guaranteed response, please use direct messaging.
-  </p>
-</footer>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="script.js" defer></script>
+  </footer>
+  </div> <!-- /content-wrapper -->
+
+  <script src="script.js"></script>
+  
+  <!-- Font Awesome (Moved to bottom to prevent blocking) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    // Reveal the site only when everything is ready
+    window.addEventListener('load', function() {
+      const loader = document.getElementById('loader');
+      const content = document.getElementById('content-wrapper');
+      
+      // Extended display time
+      setTimeout(() => {
+        // 1. Hide Loader
+        if (loader) {
+          loader.style.opacity = '0';
+          loader.style.visibility = 'hidden';
+        }
+        
+        // 2. Show Content
+        if (content) {
+          content.style.visibility = 'visible';
+          content.style.opacity = '1';
+        }
+      }, 800);
+    });
+    
+    // Force cleanup of any old Service Workers that might be caching the site
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+          console.log('Old Service Worker unregistered');
+        }
+      });
+    }
+  </script>
 </body>
 </html>
