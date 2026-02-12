@@ -370,6 +370,18 @@
     }
     .hidden { display: none !important; }
   </style>
+<!-- iOS Audio Wake-up Script -->
+  <script>
+    window.addEventListener('touchstart', function() {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (AudioContext) {
+        const ctx = new AudioContext();
+        if (ctx.state === 'suspended') {
+          ctx.resume().then(() => console.log('AudioContext resumed via touchstart'));
+        }
+      }
+    }, { once: true });
+  </script>
 </head>
 <body>
   <div id="loader" style="opacity: 1; visibility: visible;">

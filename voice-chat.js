@@ -35,14 +35,16 @@ function initPeer(userId, userName) {
       return;
   }
 
-  // PeerJS подключается к публичному серверу по умолчанию. 
-  // Конфигурация STUN-серверов Google для работы за NAT (важно для мобильных)
-  peer = new Peer(undefined, {
+  // Используем user.uid как фиксированный Peer ID
+  // Конфигурация: используем стандартный Cloud сервер (оставляем параметры пустыми),
+  // но добавляем расширенный список STUN серверов, включая Twilio.
+  peer = new Peer(userId, {
     debug: 2,
     config: {
       'iceServers': [
         { 'urls': 'stun:stun.l.google.com:19302' },
-        { 'urls': 'stun:stun1.l.google.com:19302' }
+        { 'urls': 'stun:stun1.l.google.com:19302' },
+        { 'urls': 'stun:global.stun.twilio.com:3478' }
       ]
     }
   });
@@ -63,6 +65,9 @@ function initPeer(userId, userName) {
   
   peer.on('error', (err) => {
     console.error('PeerJS error:', err);
+    // Выводим ошибку в чат
+    addSystemMessageToChat(`PeerJS Error (${err.type}): ${err.message}`);
+    
     // Игнорируем ошибки типа 'peer-unavailable', если пользователь отключился
     if (err.type !== 'peer-unavailable') {
         alert('Ошибка соединения P2P: ' + err.type);
@@ -70,7 +75,41 @@ function initPeer(userId, userName) {
   });
 }
 
+function addSystemMessageToChat(text) {
+    const chatMessages = document.getElementById('vc-chat-messages');
+    if (chatMessages) {
+        const div = document.createElement('div');
+        div.className = "vc-message system-message";
+        div.style.marginBottom = "4px";
+        div.style.fontSize = "0.75rem";
+        div.style.color = "red";
+        div.innerHTML = `<strong>System:</strong> ${text}`;
+        chatMessages.appendChild(div);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+}
+
 // --- FIREBASE LOGIC ---
+
+// --- AUTH STATE LISTENER ---
+// Перенесли инициализацию сюда
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    console.log("Auth state changed: User logged in", user.uid);
+    const name = user.displayName || user.email.split('@')[0];
+    onUserAuth(user.uid, name);
+  } else {
+    console.log("Auth state changed: User logged out");
+    if (peer) {
+        peer.destroy();
+        peer = null;
+    }
+    // Сброс UI
+    if (loginPanel) loginPanel.classList.remove('hidden');
+    if (usersPanel) usersPanel.classList.add('hidden');
+    if (usersList) usersList.innerHTML = '';
+  }
+});
 
 function saveUserToDB(userId, name, peerId) {
   // Ссылка на пользователя
@@ -188,12 +227,8 @@ async function handleLogin() {
   console.log("Voice Chat: Attempting login for", email);
 
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-    console.log("Voice Chat: Login successful", user.uid);
-    // Имя берем из email для простоты, если нет displayName
-    const name = user.displayName || email.split('@')[0]; 
-    onUserAuth(user.uid, name);
+    await signInWithEmailAndPassword(auth, email, password);
+    // onAuthStateChanged сработает автоматически
   } catch (error) {
     console.error("Voice Chat: Login failed", error);
     alert(getFirebaseErrorMessage(error));
@@ -212,11 +247,8 @@ async function handleRegister() {
   console.log("Voice Chat: Attempting registration for", email);
 
   try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-    console.log("Voice Chat: Registration successful", user.uid);
-    const name = email.split('@')[0];
-    onUserAuth(user.uid, name);
+    await createUserWithEmailAndPassword(auth, email, password);
+    // onAuthStateChanged сработает автоматически
   } catch (error) {
     console.error("Voice Chat: Registration failed", error);
     alert(getFirebaseErrorMessage(error));
@@ -225,17 +257,17 @@ async function handleRegister() {
 
 function handleLogout() {
   signOut(auth).then(() => {
-    if (peer) peer.destroy();
-    loginPanel.classList.remove('hidden');
-    usersPanel.classList.add('hidden');
-    // Очистить список
-    usersList.innerHTML = '';
+    // onAuthStateChanged сработает автоматически
   });
 }
 
 function onUserAuth(userId, userName) {
-  loginPanel.classList.add('hidden');
-  usersPanel.classList.remove('hidden');
+  // Убедимся, что элементы найдены (на случай если вызов раньше DOMContentLoaded)
+  if (!loginPanel || !usersPanel) {
+      initVoiceChat(); // Попытка инициализации если null
+  }
+  if (loginPanel) loginPanel.classList.add('hidden');
+  if (usersPanel) usersPanel.classList.remove('hidden');
   
   // Инициализация PeerJS
   initPeer(userId, userName);
@@ -338,17 +370,15 @@ function initChat(userId, userName) {
 window.startCall = async (remotePeerId, remoteName) => {
   console.log("Starting call to:", remoteName);
   
-  // ВАЖНО ДЛЯ SAFARI:
-  // Запускаем запросы к API (getUserMedia и AudioContext) синхронно в начале функции,
-  // чтобы браузер связал их с жестом пользователя (кликом).
-  const mediaPromise = navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-  const audioContextPromise = resumeAudioContext();
-
   try {
-    // Ждем разрешения пользователя и готовности аудио
-    localStream = await mediaPromise;
-    await audioContextPromise;
+    // 1. Сначала запрашиваем доступ к микрофону (GetUserMedia)
+    // Это должно быть ПЕРВЫМ действием после клика.
+    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+
+    // 2. "Будим" AudioContext (для iOS Safari)
+    await resumeAudioContext();
     
+    // 3. Только когда есть поток и аудио готово — звоним
     const call = peer.call(remotePeerId, localStream);
     handleCallStream(call);
     
@@ -379,18 +409,16 @@ function showIncomingCallModal(call) {
 async function acceptCall() {
   console.log("Accepting call...");
   
-  // ВАЖНО ДЛЯ SAFARI:
-  // Запускаем запросы к API (getUserMedia и AudioContext) синхронно в начале функции
-  const mediaPromise = navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-  const audioContextPromise = resumeAudioContext();
-  
   callModal.classList.add('hidden');
   
   try {
-    // Ждем разрешения пользователя и готовности аудио
-    localStream = await mediaPromise;
-    await audioContextPromise;
+    // 1. Сначала микрофон
+    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
     
+    // 2. Будим аудио
+    await resumeAudioContext();
+    
+    // 3. Отвечаем на звонок
     if (incomingCallInstance) {
       incomingCallInstance.answer(localStream);
       handleCallStream(incomingCallInstance);
