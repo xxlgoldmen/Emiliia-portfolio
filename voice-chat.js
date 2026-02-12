@@ -42,10 +42,9 @@ function initPeer(userId, userName) {
   console.log("Initializing PeerJS with ID:", cleanUserId);
 
   // Используем user.uid (очищенный) как фиксированный Peer ID
+  // ВЕРНУЛИ СТАНДАРТНУЮ КОНФИГУРАЦИЮ (без явного host), так как peerjs.com может быть перегружен
+  // или блокировать соединения. Санитизация ID должна решить проблему "invalid-id".
   peer = new Peer(cleanUserId, {
-    host: 'peerjs.com',
-    secure: true,
-    path: '/',
     debug: 2,
     config: {
       'iceServers': [
@@ -59,9 +58,19 @@ function initPeer(userId, userName) {
   peer.on('open', (id) => {
     myPeerId = id;
     console.log('My Peer ID:', id);
+    addSystemMessageToChat('Connected to PeerJS server.');
     
     // Сохраняем пользователя в Realtime Database
     saveUserToDB(userId, userName, id);
+  });
+
+  peer.on('disconnected', () => {
+      console.log('Connection lost. Reconnecting...');
+      addSystemMessageToChat('Connection lost. Reconnecting...');
+      // Пытаемся переподключиться
+      if (peer && !peer.destroyed) {
+          peer.reconnect();
+      }
   });
 
   peer.on('call', (call) => {
@@ -77,8 +86,11 @@ function initPeer(userId, userName) {
     alert('Peer Error: ' + err.type); // ALERT для телефона
     
     // Игнорируем ошибки типа 'peer-unavailable', если пользователь отключился
-    if (err.type !== 'peer-unavailable') {
-        // alert('Ошибка соединения P2P: ' + err.type); // Дубликат убираем
+    if (err.type === 'network') {
+        addSystemMessageToChat('Network error. Retrying in 2s...');
+        setTimeout(() => {
+            if (peer && !peer.destroyed) peer.reconnect();
+        }, 2000);
     }
   });
 }
