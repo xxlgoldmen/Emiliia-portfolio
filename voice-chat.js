@@ -30,10 +30,21 @@ let remoteAudio = null; // Будет инициализирован из DOM
 
 // --- PEERJS ИНИЦИАЛИЗАЦИЯ ---
 function initPeer(userId, userName) {
+  if (peer) {
+      console.log("PeerJS already initialized, skipping.");
+      return;
+  }
+
   // PeerJS подключается к публичному серверу по умолчанию. 
-  // В продакшене лучше поднять свой PeerServer.
+  // Конфигурация STUN-серверов Google для работы за NAT (важно для мобильных)
   peer = new Peer(undefined, {
-    debug: 2
+    debug: 2,
+    config: {
+      'iceServers': [
+        { 'urls': 'stun:stun.l.google.com:19302' },
+        { 'urls': 'stun:stun1.l.google.com:19302' }
+      ]
+    }
   });
 
   peer.on('open', (id) => {
@@ -52,7 +63,10 @@ function initPeer(userId, userName) {
   
   peer.on('error', (err) => {
     console.error('PeerJS error:', err);
-    alert('Ошибка соединения P2P: ' + err.type);
+    // Игнорируем ошибки типа 'peer-unavailable', если пользователь отключился
+    if (err.type !== 'peer-unavailable') {
+        alert('Ошибка соединения P2P: ' + err.type);
+    }
   });
 }
 
@@ -322,12 +336,18 @@ function initChat(userId, userName) {
 
 // Глобальная функция для вызова из HTML
 window.startCall = async (remotePeerId, remoteName) => {
-  // iOS требование: возобновляем AudioContext по клику
-  await resumeAudioContext();
+  console.log("Starting call to:", remoteName);
+  
+  // ВАЖНО ДЛЯ SAFARI:
+  // Запускаем запросы к API (getUserMedia и AudioContext) синхронно в начале функции,
+  // чтобы браузер связал их с жестом пользователя (кликом).
+  const mediaPromise = navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+  const audioContextPromise = resumeAudioContext();
 
   try {
-    // Получаем доступ к микрофону
-    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    // Ждем разрешения пользователя и готовности аудио
+    localStream = await mediaPromise;
+    await audioContextPromise;
     
     const call = peer.call(remotePeerId, localStream);
     handleCallStream(call);
@@ -357,17 +377,28 @@ function showIncomingCallModal(call) {
 }
 
 async function acceptCall() {
-  // iOS требование
-  await resumeAudioContext();
+  console.log("Accepting call...");
+  
+  // ВАЖНО ДЛЯ SAFARI:
+  // Запускаем запросы к API (getUserMedia и AudioContext) синхронно в начале функции
+  const mediaPromise = navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+  const audioContextPromise = resumeAudioContext();
   
   callModal.classList.add('hidden');
   
   try {
-    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-    incomingCallInstance.answer(localStream);
-    handleCallStream(incomingCallInstance);
-    currentCall = incomingCallInstance;
-    document.getElementById('vc-active-call-controls').classList.remove('hidden');
+    // Ждем разрешения пользователя и готовности аудио
+    localStream = await mediaPromise;
+    await audioContextPromise;
+    
+    if (incomingCallInstance) {
+      incomingCallInstance.answer(localStream);
+      handleCallStream(incomingCallInstance);
+      currentCall = incomingCallInstance;
+      document.getElementById('vc-active-call-controls').classList.remove('hidden');
+    } else {
+      console.error("No incoming call instance found!");
+    }
   } catch (err) {
     console.error(err);
     if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
