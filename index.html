@@ -645,10 +645,20 @@
           <input type="password" id="vc-password" class="vc-input" placeholder="Password">
           <button id="vc-login-btn" class="vc-btn">Log In</button>
           <button id="vc-register-btn" class="vc-btn vc-btn-outline">Register</button>
+          <button id="vc-test-mic-btn" class="vc-btn" style="background: #f59e0b; margin-top: 10px; font-size: 0.8rem;">Проверить микрофон</button>
         </div>
 
         <!-- Users Panel -->
         <div id="vc-users-panel" class="hidden">
+          
+          <!-- Activation Button for iOS/Safari -->
+          <div id="vc-activation-area" style="margin-bottom: 10px; text-align: center;">
+             <button id="vc-activate-btn" class="vc-btn" style="background: #ef4444; font-weight: bold; animation: pulse 2s infinite;">
+               <i class="fa-solid fa-power-off"></i> Активировать связь
+             </button>
+             <p style="font-size: 0.7rem; color: #666; margin-top: 4px;">Нажмите, чтобы разрешить звонки</p>
+          </div>
+
           <h4 class="mb-2 font-bold text-sm">Online Users</h4>
           <ul id="vc-users-list">
             <!-- Users will appear here -->

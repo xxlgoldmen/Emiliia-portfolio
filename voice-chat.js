@@ -35,10 +35,17 @@ function initPeer(userId, userName) {
       return;
   }
 
-  // Используем user.uid как фиксированный Peer ID
-  // Конфигурация: используем стандартный Cloud сервер (оставляем параметры пустыми),
-  // но добавляем расширенный список STUN серверов, включая Twilio.
-  peer = new Peer(userId, {
+  // Санитизация ID: удаляем все спецсимволы, оставляем только буквы и цифры
+  // PeerJS иногда капризничает с дефисами или подчеркиваниями в ID
+  const cleanUserId = userId.replace(/[^a-zA-Z0-9]/g, '');
+
+  console.log("Initializing PeerJS with ID:", cleanUserId);
+
+  // Используем user.uid (очищенный) как фиксированный Peer ID
+  peer = new Peer(cleanUserId, {
+    host: 'peerjs.com',
+    secure: true,
+    path: '/',
     debug: 2,
     config: {
       'iceServers': [
@@ -67,10 +74,11 @@ function initPeer(userId, userName) {
     console.error('PeerJS error:', err);
     // Выводим ошибку в чат
     addSystemMessageToChat(`PeerJS Error (${err.type}): ${err.message}`);
+    alert('Peer Error: ' + err.type); // ALERT для телефона
     
     // Игнорируем ошибки типа 'peer-unavailable', если пользователь отключился
     if (err.type !== 'peer-unavailable') {
-        alert('Ошибка соединения P2P: ' + err.type);
+        // alert('Ошибка соединения P2P: ' + err.type); // Дубликат убираем
     }
   });
 }
@@ -163,6 +171,7 @@ function initVoiceChat() {
   document.getElementById('vc-accept-call')?.addEventListener('click', acceptCall);
   document.getElementById('vc-reject-call')?.addEventListener('click', rejectCall);
   document.getElementById('vc-end-call')?.addEventListener('click', endCurrentCall);
+  document.getElementById('vc-test-mic-btn')?.addEventListener('click', testMicrophone);
 
   // Toggle виджета
   if (toggleBtn) {
@@ -270,7 +279,45 @@ function onUserAuth(userId, userName) {
   if (usersPanel) usersPanel.classList.remove('hidden');
   
   // Инициализация PeerJS
-  initPeer(userId, userName);
+  // initPeer(userId, userName); -> УБРАНО! Теперь только по кнопке.
+  
+  // Показываем кнопку активации
+  const activateBtn = document.getElementById('vc-activate-btn');
+  const activationArea = document.getElementById('vc-activation-area');
+  
+  if (activateBtn && activationArea) {
+      activationArea.classList.remove('hidden');
+      // Удаляем старые слушатели (клонированием)
+      const newBtn = activateBtn.cloneNode(true);
+      activateBtn.parentNode.replaceChild(newBtn, activateBtn);
+      
+      newBtn.addEventListener('click', async () => {
+          try {
+              console.log("Activating voice chat...");
+              newBtn.disabled = true;
+              newBtn.textContent = "Подключение...";
+              
+              // 1. Resume AudioContext
+              await resumeAudioContext();
+              
+              // 2. Get UserMedia
+              localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+              console.log("Microphone access granted for activation");
+              
+              // 3. Init Peer
+              initPeer(userId, userName);
+              
+              // Скрываем кнопку после успеха
+              activationArea.classList.add('hidden');
+              
+          } catch (err) {
+              console.error("Activation failed:", err);
+              alert("Ошибка активации: " + err.message);
+              newBtn.disabled = false;
+              newBtn.textContent = "Попробовать снова";
+          }
+      });
+  }
   
   // Слушаем список пользователей
   const usersRef = ref(db, 'users');
@@ -476,6 +523,25 @@ function handleCallStream(call) {
 }
 
 // --- UTILS ---
+async function testMicrophone() {
+    console.log("Testing microphone...");
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+        alert("ВНИМАНИЕ: Ваш сайт работает по HTTP. На iPhone и большинстве устройств доступ к микрофону работает ТОЛЬКО по HTTPS!");
+    }
+    
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        console.log("Microphone access granted");
+        alert("Успех! Браузер дал доступ к микрофону.\nTracks: " + stream.getAudioTracks().length);
+        
+        // Сразу останавливаем, это только тест
+        stream.getTracks().forEach(track => track.stop());
+    } catch (err) {
+        console.error("Microphone test failed:", err);
+        alert(`Ошибка доступа к микрофону:\nName: ${err.name}\nMessage: ${err.message}`);
+    }
+}
+
 // Хак для iOS AudioContext
 async function resumeAudioContext() {
   const AudioContext = window.AudioContext || window.webkitAudioContext;
