@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
   <title>Emiliia Lebedeva | Rhythmic Gymnast & Research Student</title>
   
   <meta name="description" content="Athletic and academic portfolio of Emiliia Lebedeva, Rhythmic Gymnast and Research Student.">
@@ -16,7 +15,6 @@
   <link rel="shortcut icon" href="images/favicon.ico">
   <meta name="theme-color" content="#1d4ed8">
   
-  <!-- Main Styles -->
   <style>
     /* CRITICAL CSS INLINED FOR 0ms FOUC */
     :root {
@@ -227,168 +225,412 @@
       transform: none;
     }
 
-    /* Voice Chat Widget */
-    #voice-chat-widget {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 1000;
-      font-family: var(--font-family);
+    /* Voice Chat Widget Styles - Telegram Theme */
+    #chat-widget-container { 
+      position: fixed; 
+      bottom: calc(20px + env(safe-area-inset-bottom)); 
+      right: 20px; 
+      z-index: 1000; 
+      font-family: var(--font-family); 
     }
-    .vc-toggle-btn {
-      width: 60px;
-      height: 60px;
+    
+    #chat-toggle-btn { 
+      background: linear-gradient(135deg, #60a5fa, #3730a3); /* light blue to indigo */
+      color: var(--white); 
+      border: none; 
+      border-radius: 50%; 
+      width: 60px; 
+      height: 60px; 
+      cursor: pointer; 
+      font-size: 24px; 
+      box-shadow: 0 4px 15px rgba(55, 48, 163, 0.4), 0 0 20px rgba(96, 165, 250, 0.6); /* Neon glow */
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      position: relative;
+    }
+    
+    #chat-toggle-btn:hover { 
+      transform: translateY(-5px) scale(1.05); 
+      box-shadow: 0 8px 25px rgba(55, 48, 163, 0.5), 0 0 30px rgba(96, 165, 250, 0.8);
+      filter: brightness(1.1);
+    }
+
+    #chat-toggle-btn.has-notification {
+      animation: pulse-glow 2s infinite;
+    }
+
+    #chat-toggle-btn.has-notification::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       border-radius: 50%;
-      background: var(--primary-color);
-      color: white;
-      border: none;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      cursor: pointer;
-      font-size: 24px;
+      box-shadow: 0 0 0 0 rgba(96, 165, 250, 0.7);
+      animation: pulse-ring 2s infinite;
+      z-index: -1;
+    }
+    
+    #chat-toggle-btn.has-notification::before {
+      content: '';
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      width: 12px;
+      height: 12px;
+      background-color: #ef4444; /* red-500 */
+      border: 2px solid #fff;
+      border-radius: 50%;
+      z-index: 10;
+    }
+
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(96, 165, 250, 0.7); }
+      70% { transform: scale(1.6); box-shadow: 0 0 0 20px rgba(96, 165, 250, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(96, 165, 250, 0); }
+    }
+    
+    @keyframes pulse-glow {
+      0% { box-shadow: 0 4px 15px rgba(55, 48, 163, 0.4), 0 0 20px rgba(96, 165, 250, 0.6); transform: scale(1); }
+      50% { box-shadow: 0 4px 30px rgba(55, 48, 163, 0.6), 0 0 40px rgba(96, 165, 250, 0.8); transform: scale(1.05); }
+      100% { box-shadow: 0 4px 15px rgba(55, 48, 163, 0.4), 0 0 20px rgba(96, 165, 250, 0.6); transform: scale(1); }
+    }
+    
+    @keyframes bounce-once {
+        0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+        40% {transform: translateY(-20px);}
+        60% {transform: translateY(-10px);}
+    }
+
+    #chat-toggle-btn.bounce-once {
+        animation: bounce-once 1s ease;
+    }
+    
+    #chat-window { 
+      display: flex; 
+      background: rgba(255, 255, 255, 0.9); /* Semi-transparent for blur */
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      width: 360px; 
+      height: 550px; 
+      position: absolute; 
+      bottom: 80px; 
+      right: 0; 
+      flex-direction: column; 
+      border-radius: 16px; 
+      box-shadow: 0 10px 40px rgba(0,0,0,0.15); 
+      overflow: hidden; 
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(20px) scale(0.95);
+      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      pointer-events: none;
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+    #chat-window.chat-visible { opacity: 0.9; visibility: visible; transform: translateY(0) scale(1); pointer-events: auto; }
+    #chat-window.chat-visible:hover { opacity: 1; }
+
+    /* Mobile Responsive Tweaks */
+    @media (max-width: 480px) {
+        #chat-window {
+            width: 90vw;
+            right: -10px; /* Slight offset compensation or just 0 */
+            /* We want 90vw width. Container is at right: 20px. 
+               If we set right: -10px, it shifts right.
+               Let's try to center it relative to screen.
+               Since container is fixed at bottom-right, better to use fixed positioning for window on mobile?
+               Or just adjust size.
+            */
+            width: 85vw; /* Safer width */
+            height: 70vh;
+            right: 0;
+        }
+    }
+
+    /* Header */
+    .chat-header { 
+      background: #f8f9fa; 
+      padding: 12px 15px; 
+      border-bottom: 1px solid #eee; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+    }
+    .header-left { display: flex; align-items: center; gap: 10px; }
+    .chat-title { font-weight: 700; color: #111827; }
+    
+    .connection-status {
+      display: flex;
+      align-items: center;
+      font-size: 0.75rem;
+      color: #16a34a;
+      font-weight: 500;
+      background: rgba(22, 163, 74, 0.1);
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      background-color: #16a34a;
+      border-radius: 50%;
+      margin-left: 6px;
+      position: relative;
+    }
+    
+    .status-dot::after {
+      content: '';
+      position: absolute;
+      top: -3px;
+      left: -3px;
+      width: 12px;
+      height: 12px;
+      background-color: rgba(22, 163, 74, 0.4);
+      border-radius: 50%;
+      animation: pulse-dot 1.5s infinite;
+      z-index: 0;
+    }
+
+    @keyframes pulse-dot {
+      0% { transform: scale(0.5); opacity: 1; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+    
+    .minimize-btn { background: none; border: none; cursor: pointer; color: #6b7280; font-size: 1.1rem; }
+
+    /* Waiting Message */
+    .waiting-message {
+        text-align: center;
+        font-size: 0.8rem;
+        color: #6b7280;
+        background: #f3f4f6;
+        padding: 8px 15px;
+        margin: 0 10px 5px 10px;
+        border-radius: 8px;
+        border: 1px dashed #d1d5db;
+        display: none; /* Toggled by JS */
+    }
+
+    /* Auth UI */
+    #auth-ui { padding: 20px; display: flex; flex-direction: column; gap: 10px; justify-content: center; flex: 1; background: #f0f2f5; }
+    .chat-input-auth { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; outline: none; font-size: 16px; }
+    #login-btn { width: 100%; padding: 12px; background: var(--primary-color); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 16px; }
+    #login-btn:hover { background: var(--primary-hover); }
+
+    /* App Content */
+    #app-content { display: none; flex: 1; overflow: hidden; flex-direction: column; background: #fff; position: relative; }
+    
+    /* Users Strip (Online Now) */
+    .users-strip { 
+      padding: 10px 15px; 
+      background: #fff; 
+      border-bottom: 1px solid #f0f0f0; 
+      display: flex; 
+      gap: 15px; 
+      overflow-x: auto; 
+      scrollbar-width: none; /* Firefox */
+      min-height: 90px;
+    }
+    .users-strip::-webkit-scrollbar { display: none; }
+    
+    .user-item { display: flex; flex-direction: column; align-items: center; min-width: 60px; cursor: pointer; position: relative; }
+    .user-avatar { 
+      width: 50px; 
+      height: 50px; 
+      background: linear-gradient(135deg, #60a5fa, #2563eb); 
+      color: white; 
+      border-radius: 50%; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-weight: bold; 
+      font-size: 20px; 
+      margin-bottom: 6px;
+      position: relative;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .user-avatar.online::after {
+      content: ''; position: absolute; bottom: 2px; right: 2px; width: 12px; height: 12px; 
+      background: #22c55e; border: 2px solid #fff; border-radius: 50%;
+    }
+    .user-name { font-size: 11px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70px; color: var(--text-medium); }
+    
+    /* Call Button on Avatar */
+    .user-call-btn {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      background: #fff;
+      color: #22c55e;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+      border: 1px solid #f0f0f0;
       transition: transform 0.2s;
+      z-index: 2;
     }
-    .vc-toggle-btn:hover {
-      transform: scale(1.1);
-    }
-    #vc-content {
+    /* Expanded touch target for 44x44px min size */
+    .user-call-btn::before {
+      content: '';
       position: absolute;
-      bottom: 80px;
-      right: 0;
-      width: 300px;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      border: 1px solid #e5e7eb;
-    }
-    #vc-content.hidden {
-      display: none;
-    }
-    .vc-header {
-      background: var(--primary-color);
-      color: white;
-      padding: 12px;
-      font-weight: bold;
-      text-align: center;
-    }
-    .vc-body {
-      padding: 16px;
-      max-height: 400px;
-      overflow-y: auto;
-    }
-    .vc-input {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 10px;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-    }
-    .vc-btn {
-      width: 100%;
-      padding: 8px;
-      background: var(--primary-color);
-      color: white;
-      border: none;
-      border-radius: 6px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 44px;
+      height: 44px;
       cursor: pointer;
-      margin-bottom: 5px;
     }
-    .vc-btn:hover {
-      background: var(--primary-hover);
+    .user-call-btn:hover { transform: scale(1.15); background: #22c55e; color: #fff; }
+
+    /* Chat Area */
+    /* Chat Controls & Messages */
+    .typing-indicator {
+      font-size: 0.75rem;
+      color: #6b7280;
+      font-style: italic;
+      padding: 4px 15px;
+      min-height: 24px;
+      display: flex;
+      align-items: center;
+      background: #fff;
+      transition: opacity 0.3s ease;
     }
-    .vc-btn-outline {
-      background: transparent;
-      color: var(--primary-color);
-      border: 1px solid var(--primary-color);
+
+    #chat-messages { 
+      flex: 1; 
+      padding: 15px; 
+      overflow-y: auto; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 8px; 
+      background: #eef2f5; 
     }
-    .vc-user-item {
+    
+    /* Message Bubbles */
+    .message-bubble { 
+      max-width: 80%; 
+      padding: 8px 12px; 
+      border-radius: 12px; 
+      font-size: 14px; 
+      line-height: 1.4; 
+      position: relative; 
+      word-wrap: break-word; 
+      box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+    }
+    .message-bubble.me { 
+      align-self: flex-end; 
+      background: #eff6ff; /* Light blue */
+      color: #000; 
+      border-bottom-right-radius: 2px; 
+    }
+    .message-bubble.other { 
+      align-self: flex-start; 
+      background: #fff; 
+      color: #000; 
+      border-bottom-left-radius: 2px; 
+    }
+    
+    .msg-meta { display: flex; justify-content: flex-end; align-items: center; gap: 5px; margin-top: 2px; opacity: 0.6; font-size: 10px; }
+    .msg-sender { font-weight: 600; color: var(--primary-color); font-size: 11px; margin-bottom: 2px; display: block; }
+    
+    .message-bubble.system {
+      align-self: center;
+      background: #eff6ff; /* blue-50 */
+      color: #1e40af; /* blue-800 */
+      border: 1px solid #dbeafe; /* blue-100 */
+      border-radius: 12px;
+      font-size: 0.85rem;
+      text-align: center;
+      max-width: 90%;
+      box-shadow: none;
+      margin: 10px auto;
+    }
+    .message-bubble.system .msg-sender { display: none; }
+    
+    /* Input Area */
+    .chat-controls { 
+      padding: 10px; 
+      background: #fff; 
+      border-top: 1px solid #eee; 
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
+    }
+    #msg-input { 
+      flex: 1; 
+      padding: 10px 15px; 
+      border-radius: 20px; 
+      background: #f0f2f5; 
+      border: none; 
+      outline: none; 
+      font-size: 16px; /* 16px to prevent zoom on iOS */
+      transition: background 0.2s;
+    }
+    #msg-input:focus { background: #fff; box-shadow: inset 0 0 0 1px #ddd; }
+    #msg-send-btn { 
+      background: none; 
+      border: none; 
+      color: var(--primary-color); 
+      font-size: 22px; 
+      cursor: pointer; 
+      transition: transform 0.2s; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      width: 44px; /* Min touch target */
+      height: 44px; /* Min touch target */
+    }
+    #msg-send-btn:hover { transform: scale(1.1); color: var(--primary-hover); }
+
+    /* Call Notification Popup (Top of Chat) */
+    .call-popup {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
+      padding: 12px 15px;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+      z-index: 10;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 8px;
-      border-bottom: 1px solid #f3f4f6;
+      transform: translateY(-150%);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      border: 1px solid rgba(0,0,0,0.05);
     }
-    .vc-call-btn {
-      background: #10b981;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 32px;
-      height: 32px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    /* Modal */
-    #vc-call-modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
-    }
-    #vc-call-modal.hidden {
-      display: none;
-    }
-    .vc-modal-content {
-      background: white;
-      padding: 24px;
-      border-radius: 12px;
-      text-align: center;
-      width: 90%;
-      max-width: 320px;
-    }
-    .vc-modal-actions {
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-      margin-top: 20px;
-    }
-    .vc-btn-accept {
-      background: #10b981;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-    }
-    .vc-btn-reject {
-      background: #ef4444;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-    }
-    .hidden { display: none !important; }
-<!-- iOS Audio Wake-up Script -->
-  <script>
-    window.addEventListener('touchstart', function() {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (AudioContext) {
-        const ctx = new AudioContext();
-        if (ctx.state === 'suspended') {
-          ctx.resume().then(() => console.log('AudioContext resumed via touchstart'));
-        }
-      }
-    }, { once: true });
-  </script>
+    .call-popup.active { transform: translateY(0); }
+    .call-info { display: flex; align-items: center; gap: 10px; }
+    .call-avatar { width: 36px; height: 36px; background: var(--accent-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
+    .call-text-group { display: flex; flex-direction: column; }
+    .call-name { font-weight: 600; font-size: 14px; }
+    .call-status { font-size: 11px; color: var(--text-light); animation: pulse 1.5s infinite; }
+    
+    .call-actions { display: flex; gap: 8px; }
+    .btn-call-accept { width: 36px; height: 36px; border-radius: 50%; background: #22c55e; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; font-size: 14px; }
+    .btn-call-decline { width: 36px; height: 36px; border-radius: 50%; background: #ef4444; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; font-size: 14px; }
+    .btn-call-accept:hover, .btn-call-decline:hover { transform: scale(1.1); }
+    
+    @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
 
-  <!-- Firebase SDK (Modular) - Using CDN scripts for simplicity/compatibility with vanilla JS approach -->
-  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-database-compat.js"></script>
-  
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    /* Mobile Responsive */
+    @media (max-width: 480px) {
+      #chat-window { width: 100vw; height: 100vh; bottom: 0; right: 0; border-radius: 0; }
+      #chat-widget-container { bottom: 0; right: 0; z-index: 9999; }
+      #chat-toggle-btn { bottom: 20px; right: 20px; position: fixed; }
+    }
+  </style>
 </head>
 <body>
   <div id="loader" style="opacity: 1; visibility: visible;">
@@ -640,73 +882,83 @@
       });
     }
   </script>
-  <!-- Voice Chat Widget -->
-  <div id="voice-chat-widget">
-    <div id="vc-content" class="hidden">
-      <div class="vc-header">Voice Chat</div>
-      <div class="vc-body">
-        
-        <!-- Login Panel -->
-        <div id="vc-login-panel">
-          <input type="email" id="vc-email" class="vc-input" placeholder="Email">
-          <input type="password" id="vc-password" class="vc-input" placeholder="Password">
-          <button id="vc-login-btn" class="vc-btn">Log In</button>
-          <button id="vc-register-btn" class="vc-btn vc-btn-outline">Register</button>
-          <button id="vc-test-mic-btn" class="vc-btn" style="background: #f59e0b; margin-top: 10px; font-size: 0.8rem;">Проверить микрофон</button>
-        </div>
-
-        <!-- Users Panel -->
-        <div id="vc-users-panel" class="hidden">
-          
-          <div id="vc-user-list" class="vc-user-list">
-             <!-- Users will be populated here -->
-             <p style="text-align:center; color: #666; font-size: 0.9rem;">Загрузка пользователей...</p>
-          </div>
-          
-          <!-- Chat Area -->
-          <div id="vc-chat-area" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
-            <h4 class="mb-2 font-bold text-sm">Lobby Chat</h4>
-            <div id="vc-chat-messages" style="height: 100px; overflow-y: auto; background: #f9f9f9; padding: 5px; border-radius: 4px; border: 1px solid #ddd; margin-bottom: 5px;"></div>
-            <div style="display: flex; gap: 5px;">
-              <input type="text" id="vc-chat-input" class="vc-input" style="margin-bottom: 0;" placeholder="Message...">
-              <button id="vc-chat-send-btn" class="vc-btn" style="width: auto; margin-bottom: 0;">Send</button>
+  <div id="chat-widget-container">
+    <button id="chat-toggle-btn"><i class="fas fa-paper-plane"></i></button>
+    
+    <div id="chat-window"> 
+      <!-- Header -->
+      <div class="chat-header">
+        <div class="header-left">
+            <span class="chat-title">Чат с Эмилией</span>
+            <div class="connection-status">
+                Online <div class="status-dot"></div>
             </div>
-          </div>
+        </div>
+        <div class="header-controls" style="display: flex; align-items: center; gap: 8px;">
+            <button id="clear-chat-btn" class="minimize-btn" title="Очистить чат (только для себя)">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+            <button id="chat-minimize-btn" class="minimize-btn"><i class="fas fa-minus"></i></button>
+        </div>
+      </div>
+      
+      <!-- Loader -->
+      <div id="chat-loader-spinner" class="spinner" style="display: none; width: 30px; height: 30px; border-width: 3px; margin: 20px auto;"></div>
 
-          <button id="vc-logout-btn" class="vc-btn vc-btn-outline mt-4">Выйти</button>
+      <!-- Call Popup (Absolute inside Chat Window) -->
+      <div id="call-popup" class="call-popup">
+         <div class="call-info">
+           <div class="call-avatar"><i class="fas fa-phone"></i></div>
+           <div class="call-text-group">
+             <span id="call-from-name" class="call-name">User</span>
+             <span class="call-status">Incoming call...</span>
+           </div>
+         </div>
+         <div class="call-actions">
+           <button id="btn-accept" class="btn-call-accept"><i class="fas fa-phone"></i></button>
+           <button id="btn-decline" class="btn-call-decline"><i class="fas fa-times"></i></button>
+         </div>
+      </div>
+
+      <!-- Auth UI -->
+      <div id="auth-ui"> 
+          <h3 style="text-align: center; margin-bottom: 10px;">Welcome</h3>
+          <input type="email" id="email-input" class="chat-input-auth" placeholder="Email"> 
+          <input type="password" id="pass-input" class="chat-input-auth" placeholder="Password"> 
+          <button id="login-btn">Login</button> 
+      </div> 
+      
+      <!-- App Content -->
+      <div id="app-content">
+        
+        <!-- Online Users Strip -->
+        <div id="users-strip" class="users-strip">
+           <!-- User Items injected here -->
         </div>
 
-        <!-- Active Call Controls -->
-        <div id="vc-active-call-controls" class="hidden mt-4 pt-4 border-t">
-          <p class="text-center mb-2 font-bold text-green-600">Call Active</p>
-          <button id="vc-end-call" class="vc-btn" style="background: #ef4444;">End Call</button>
+        <!-- Chat Area -->
+        <div id="chat-messages">
+           <!-- Messages injected here -->
+        </div>
+        
+        <!-- Typing Indicator -->
+        <div id="typing-indicator" class="typing-indicator"></div>
+
+        <!-- Waiting Message -->
+        <div id="waiting-message" class="waiting-message">
+            Сейчас в чате только вы. Как только кто-то зайдет, вы увидите его в списке выше.
+        </div>
+
+        <!-- Input Area -->
+        <div class="chat-controls">
+          <input type="text" id="msg-input" placeholder="Message...">
+          <button id="msg-send-btn"><i class="fas fa-paper-plane"></i></button>
         </div>
 
       </div>
     </div>
-    <button id="vc-toggle-btn" class="vc-toggle-btn">
-      <i class="fa-solid fa-headset"></i>
-    </button>
   </div>
 
-  <!-- Incoming Call Modal -->
-  <div id="vc-call-modal" class="hidden">
-    <div class="vc-modal-content">
-      <h3 class="text-lg font-bold mb-2">Incoming Call</h3>
-      <p id="vc-incoming-name" class="mb-4">Unknown User</p>
-      <div class="vc-modal-actions">
-        <button id="vc-reject-call" class="vc-btn-reject"><i class="fa-solid fa-phone-slash"></i> Reject</button>
-        <button id="vc-accept-call" class="vc-btn-accept"><i class="fa-solid fa-phone"></i> Accept</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Hidden Remote Audio for iOS -->
-  <audio id="remote-audio" autoplay playsinline style="display: none;"></audio>
-
-  <!-- PeerJS -->
-  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-  <!-- Main Logic -->
   <script type="module" src="voice-chat.js"></script>
 </body>
 </html>
