@@ -1,6 +1,6 @@
 // --- VOICE CHAT SCRIPT (TELEGRAM STYLE v2) ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, signInAnonymously, updateProfile, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getDatabase, ref, set, update, onValue, onDisconnect, remove, push, onChildAdded, onChildRemoved } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 console.log("Voice Chat: Module Loaded");
@@ -58,13 +58,21 @@ try {
   
   // Auth UI
   const loginPanel = document.getElementById('auth-ui');
-  const loginForm = document.getElementById('login-form');
-  const loginConfirm = document.getElementById('login-confirm');
-  const confirmNameDisplay = document.getElementById('confirm-name-display');
-  const usernameInput = document.getElementById('username-input');
-  const loginBtn = document.getElementById('login-btn');
-  const confirmYesBtn = document.getElementById('confirm-yes-btn');
-  const confirmNoBtn = document.getElementById('confirm-no-btn');
+  const loginView = document.getElementById('auth-login-view');
+  const registerView = document.getElementById('auth-register-view');
+  
+  // Login Inputs
+  const loginEmail = document.getElementById('login-email');
+  const loginPassword = document.getElementById('login-password');
+  const btnDoLogin = document.getElementById('btn-do-login');
+  const btnShowRegister = document.getElementById('btn-show-register');
+
+  // Register Inputs
+  const regUsername = document.getElementById('reg-username');
+  const regEmail = document.getElementById('reg-email');
+  const regPassword = document.getElementById('reg-password');
+  const btnDoRegister = document.getElementById('btn-do-register');
+  const btnShowLogin = document.getElementById('btn-show-login');
   
   // App Content
   const appContent = document.getElementById('app-content');
@@ -77,6 +85,7 @@ try {
   const typingIndicator = document.getElementById('typing-indicator');
   const waitingMessage = document.getElementById('waiting-message');
   const clearChatBtn = document.getElementById('clear-chat-btn');
+  const logoutBtn = document.getElementById('logout-btn');
   
   // --- STATE ---
   let userId = null;
@@ -107,7 +116,7 @@ try {
               if (auth.currentUser) {
                   msgInput?.focus();
               } else {
-                  usernameInput?.focus();
+                  loginEmail?.focus();
               }
           }, 350);
       } else {
@@ -141,79 +150,110 @@ try {
       }
   });
 
-  // Clear Chat Button Logic
-  if (clearChatBtn) {
-      clearChatBtn.onclick = () => {
-          if (msgArea) {
-              // Only remove message bubbles, keep waiting message/typing indicator
-              const bubbles = msgArea.querySelectorAll('.message-bubble');
-              bubbles.forEach(b => b.remove());
-              
-              // Note: We do NOT clear allMessageKeys, because that tracks server state
-              // This button is "visually clear for me only"
+  // Logout Button Logic
+  if (logoutBtn) {
+      logoutBtn.onclick = async () => {
+          try {
+              await signOut(auth);
+              // UI reset handled by onAuthStateChanged
+          } catch (error) {
+              console.error("Logout Error:", error);
           }
       };
   }
 
-  // --- AUTH LOGIC ---
-  let pendingUsername = '';
-
-  if (loginBtn) {
-    loginBtn.addEventListener('click', () => {
-      const name = usernameInput?.value?.trim();
-      
-      if (!name) return alert("Пожалуйста, введите ваше имя");
-      if (name.length < 2) return alert("Имя слишком короткое");
-      
-      pendingUsername = name;
-      
-      // Switch to confirmation view
-      if(loginForm) loginForm.style.display = 'none';
-      if(loginConfirm) {
-          loginConfirm.style.display = 'flex';
-          if(confirmNameDisplay) confirmNameDisplay.textContent = pendingUsername;
-      }
-    });
+  // Clear Chat Button Logic
+  if (clearChatBtn) {
+      clearChatBtn.onclick = () => {
+          if (msgArea) {
+             // Remove from Firebase (Global Delete)
+             remove(ref(db, 'messages'))
+               .then(() => {
+                   // Clear local UI immediately
+                   msgArea.innerHTML = '';
+                   allMessageKeys = [];
+               })
+               .catch(error => {
+                   console.error("Error clearing chat:", error);
+                   alert("Ошибка при очистке чата: " + error.message);
+               });
+          }
+      };
   }
 
-  if (confirmNoBtn) {
-      confirmNoBtn.addEventListener('click', () => {
-          // Go back to input
-          if(loginConfirm) loginConfirm.style.display = 'none';
-          if(loginForm) loginForm.style.display = 'flex';
-          usernameInput?.focus();
-      });
+  // --- AUTH LOGIC (Email/Password) ---
+  
+  // Toggle Views
+  if (btnShowRegister) {
+      btnShowRegister.onclick = () => {
+          loginView.style.display = 'none';
+          registerView.style.display = 'flex';
+          regUsername?.focus();
+      };
   }
 
-  if (confirmYesBtn) {
-      confirmYesBtn.addEventListener('click', async () => {
-        if (!pendingUsername) return;
-        
-        if (loader) loader.style.display = 'block';
+  if (btnShowLogin) {
+      btnShowLogin.onclick = () => {
+          registerView.style.display = 'none';
+          loginView.style.display = 'flex';
+          loginEmail?.focus();
+      };
+  }
 
-        try {
-             const result = await signInAnonymously(auth);
-             // Update Profile with Nickname
-             await updateProfile(result.user, {
-                 displayName: pendingUsername
-             });
-             
-             // Force update database to ensure correct name immediately
-             // (Fixes potential race condition where onAuthStateChanged sees 'Guest')
-             update(ref(db, 'users/' + result.user.uid), { 
-                 username: pendingUsername,
-                 status: 'online'
-             });
+  // Handle Login
+  if (btnDoLogin) {
+      btnDoLogin.onclick = async () => {
+          const email = loginEmail.value.trim();
+          const pass = loginPassword.value.trim();
+          
+          if (!email || !pass) return alert("Введите email и пароль");
+          
+          if (loader) loader.style.display = 'block';
+          
+          try {
+              await signInWithEmailAndPassword(auth, email, pass);
+              // onAuthStateChanged will handle the rest
+          } catch (error) {
+              console.error(error);
+              alert("Ошибка входа: " + error.message);
+              if (loader) loader.style.display = 'none';
+          }
+      };
+  }
 
-             // We will handle the rest in onAuthStateChanged
-         } catch (error) {
-            alert("Ошибка входа: " + error.message);
-            if (loader) loader.style.display = 'none';
-            // Reset UI on error
-            if(loginConfirm) loginConfirm.style.display = 'none';
-            if(loginForm) loginForm.style.display = 'flex';
-        }
-      });
+  // Handle Registration
+  if (btnDoRegister) {
+      btnDoRegister.onclick = async () => {
+          const name = regUsername.value.trim();
+          const email = regEmail.value.trim();
+          const pass = regPassword.value.trim();
+
+          if (!name) return alert("Введите ваше имя");
+          if (!email) return alert("Введите email");
+          if (!pass || pass.length < 6) return alert("Пароль должен быть не менее 6 символов");
+          
+          if (loader) loader.style.display = 'block';
+
+          try {
+              const result = await createUserWithEmailAndPassword(auth, email, pass);
+              
+              // Update Profile with Nickname
+              await updateProfile(result.user, {
+                  displayName: name
+              });
+              
+              // Force update database
+              update(ref(db, 'users/' + result.user.uid), { 
+                  username: name,
+                  status: 'online'
+              });
+              
+          } catch (error) {
+              console.error(error);
+              alert("Ошибка регистрации: " + error.message);
+              if (loader) loader.style.display = 'none';
+          }
+      };
   }
 
   // Auth State Listener
@@ -226,6 +266,7 @@ try {
     } else {
       if (loginPanel) loginPanel.style.display = 'flex';
       if (appContent) appContent.style.display = 'none';
+      if (logoutBtn) logoutBtn.style.display = 'none';
       if (usersStrip) usersStrip.innerHTML = '';
     }
   });
@@ -233,6 +274,7 @@ try {
   function onUserAuth(userId, userName) {
     if (loginPanel) loginPanel.style.display = 'none';
     if (appContent) appContent.style.display = 'flex';
+    if (logoutBtn) logoutBtn.style.display = 'block';
     
     // Save status
     const userStatusRef = ref(db, 'users/' + userId);
@@ -534,14 +576,30 @@ try {
       welcomeMessageShown = true;
   }
 
-  function openJitsiRoom(roomName) {
+  async function openJitsiRoom(roomName) {
     // 1. Audio wakeup for iOS Safari
     const silentAudio = document.createElement('audio');
-    silentAudio.autoplay = true; // Might be blocked without user interaction context, but worth a shot if inside a click handler
-    silentAudio.play().catch(e => console.log("Audio wakeup attempt:", e));
+    silentAudio.autoplay = true;
+    try {
+        silentAudio.play().catch(e => console.log("Audio wakeup attempt:", e));
+    } catch (e) {
+        console.warn("Audio wakeup error:", e);
+    }
 
-    // 2. Updated URL with Config
-    const url = `https://meet.ffmuc.net/${roomName}#config.startWithAudioMuted=false&config.prejoinPageEnabled=false&config.startWithVideoMuted=false`;
+    // 2. Microphone Pre-check for Chrome (Force Wakeup)
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        // Stop immediately to release for Jitsi, but we woke up the permission
+        stream.getTracks().forEach(track => track.stop());
+    } catch (e) {
+        console.log("Mic pre-check failed or cancelled:", e);
+    }
+
+    // 3. Updated URL with Config
+    // Adding permissions.microphone=1 as requested and other flags
+    const url = `https://meet.ffmuc.net/${roomName}#config.startWithAudioMuted=false&config.prejoinPageEnabled=false&config.startWithVideoMuted=false&permissions.microphone=1`;
+    
+    // Open in new tab
     window.open(url, '_blank');
   }
 
