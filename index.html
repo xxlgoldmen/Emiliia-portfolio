@@ -369,7 +369,6 @@
       cursor: pointer;
     }
     .hidden { display: none !important; }
-  </style>
 <!-- iOS Audio Wake-up Script -->
   <script>
     window.addEventListener('touchstart', function() {
@@ -382,6 +381,14 @@
       }
     }, { once: true });
   </script>
+
+  <!-- Firebase SDK (Modular) - Using CDN scripts for simplicity/compatibility with vanilla JS approach -->
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-database-compat.js"></script>
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
   <div id="loader" style="opacity: 1; visibility: visible;">
@@ -651,18 +658,10 @@
         <!-- Users Panel -->
         <div id="vc-users-panel" class="hidden">
           
-          <!-- Activation Button for iOS/Safari -->
-          <div id="vc-activation-area" style="margin-bottom: 10px; text-align: center;">
-             <button id="vc-activate-btn" class="vc-btn" style="background: #ef4444; font-weight: bold; animation: pulse 2s infinite;">
-               <i class="fa-solid fa-power-off"></i> Активировать связь
-             </button>
-             <p style="font-size: 0.7rem; color: #666; margin-top: 4px;">Нажмите, чтобы разрешить звонки</p>
+          <div id="vc-user-list" class="vc-user-list">
+             <!-- Users will be populated here -->
+             <p style="text-align:center; color: #666; font-size: 0.9rem;">Загрузка пользователей...</p>
           </div>
-
-          <h4 class="mb-2 font-bold text-sm">Online Users</h4>
-          <ul id="vc-users-list">
-            <!-- Users will appear here -->
-          </ul>
           
           <!-- Chat Area -->
           <div id="vc-chat-area" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
