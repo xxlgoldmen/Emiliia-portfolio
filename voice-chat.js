@@ -1,6 +1,6 @@
 // --- VOICE CHAT SCRIPT (TELEGRAM STYLE v2) ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getAuth, signInAnonymously, updateProfile, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getDatabase, ref, set, update, onValue, onDisconnect, remove, push, onChildAdded, onChildRemoved } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 console.log("Voice Chat: Module Loaded");
@@ -58,9 +58,13 @@ try {
   
   // Auth UI
   const loginPanel = document.getElementById('auth-ui');
-  const emailInput = document.getElementById('email-input');
-  const passInput = document.getElementById('pass-input');
+  const loginForm = document.getElementById('login-form');
+  const loginConfirm = document.getElementById('login-confirm');
+  const confirmNameDisplay = document.getElementById('confirm-name-display');
+  const usernameInput = document.getElementById('username-input');
   const loginBtn = document.getElementById('login-btn');
+  const confirmYesBtn = document.getElementById('confirm-yes-btn');
+  const confirmNoBtn = document.getElementById('confirm-no-btn');
   
   // App Content
   const appContent = document.getElementById('app-content');
@@ -103,7 +107,7 @@ try {
               if (auth.currentUser) {
                   msgInput?.focus();
               } else {
-                  emailInput?.focus();
+                  usernameInput?.focus();
               }
           }, 350);
       } else {
@@ -152,31 +156,64 @@ try {
   }
 
   // --- AUTH LOGIC ---
-  if (loginBtn) {
-    loginBtn.addEventListener('click', async () => {
-      const email = emailInput?.value;
-      const password = passInput?.value;
-      
-      if (!email || !password) return alert("Enter email and password");
-      
-      if (loader) loader.style.display = 'block';
+  let pendingUsername = '';
 
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-      } catch (loginError) {
-        if (loginError.code === 'auth/user-not-found' || loginError.code === 'auth/invalid-credential') {
-          try {
-            await createUserWithEmailAndPassword(auth, email, password);
-          } catch (regError) {
-            alert("Error: " + regError.message);
-            if (loader) loader.style.display = 'none';
-          }
-        } else {
-          alert("Error: " + loginError.message);
-          if (loader) loader.style.display = 'none';
-        }
+  if (loginBtn) {
+    loginBtn.addEventListener('click', () => {
+      const name = usernameInput?.value?.trim();
+      
+      if (!name) return alert("Пожалуйста, введите ваше имя");
+      if (name.length < 2) return alert("Имя слишком короткое");
+      
+      pendingUsername = name;
+      
+      // Switch to confirmation view
+      if(loginForm) loginForm.style.display = 'none';
+      if(loginConfirm) {
+          loginConfirm.style.display = 'flex';
+          if(confirmNameDisplay) confirmNameDisplay.textContent = pendingUsername;
       }
     });
+  }
+
+  if (confirmNoBtn) {
+      confirmNoBtn.addEventListener('click', () => {
+          // Go back to input
+          if(loginConfirm) loginConfirm.style.display = 'none';
+          if(loginForm) loginForm.style.display = 'flex';
+          usernameInput?.focus();
+      });
+  }
+
+  if (confirmYesBtn) {
+      confirmYesBtn.addEventListener('click', async () => {
+        if (!pendingUsername) return;
+        
+        if (loader) loader.style.display = 'block';
+
+        try {
+             const result = await signInAnonymously(auth);
+             // Update Profile with Nickname
+             await updateProfile(result.user, {
+                 displayName: pendingUsername
+             });
+             
+             // Force update database to ensure correct name immediately
+             // (Fixes potential race condition where onAuthStateChanged sees 'Guest')
+             update(ref(db, 'users/' + result.user.uid), { 
+                 username: pendingUsername,
+                 status: 'online'
+             });
+
+             // We will handle the rest in onAuthStateChanged
+         } catch (error) {
+            alert("Ошибка входа: " + error.message);
+            if (loader) loader.style.display = 'none';
+            // Reset UI on error
+            if(loginConfirm) loginConfirm.style.display = 'none';
+            if(loginForm) loginForm.style.display = 'flex';
+        }
+      });
   }
 
   // Auth State Listener
@@ -184,7 +221,8 @@ try {
     if (loader) loader.style.display = 'none';
     
     if (user) {
-      onUserAuth(user.uid, user.email.split('@')[0]);
+      const name = user.displayName || 'Guest';
+      onUserAuth(user.uid, name);
     } else {
       if (loginPanel) loginPanel.style.display = 'flex';
       if (appContent) appContent.style.display = 'none';
@@ -497,7 +535,13 @@ try {
   }
 
   function openJitsiRoom(roomName) {
-    const url = `https://meet.ffmuc.net/${roomName}#config.prejoinPageEnabled=false&interfaceConfig.ALREADY_JOINED=true`;
+    // 1. Audio wakeup for iOS Safari
+    const silentAudio = document.createElement('audio');
+    silentAudio.autoplay = true; // Might be blocked without user interaction context, but worth a shot if inside a click handler
+    silentAudio.play().catch(e => console.log("Audio wakeup attempt:", e));
+
+    // 2. Updated URL with Config
+    const url = `https://meet.ffmuc.net/${roomName}#config.startWithAudioMuted=false&config.prejoinPageEnabled=false&config.startWithVideoMuted=false`;
     window.open(url, '_blank');
   }
 
@@ -510,7 +554,7 @@ try {
     const targetCallRef = ref(db, 'calls/' + targetUserId);
     set(targetCallRef, {
       from: auth.currentUser.uid,
-      fromName: auth.currentUser.email.split('@')[0],
+      fromName: auth.currentUser.displayName || 'Guest',
       room: roomName,
       status: 'ringing'
     });

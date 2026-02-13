@@ -230,7 +230,7 @@
       position: fixed; 
       bottom: calc(20px + env(safe-area-inset-bottom)); 
       right: 20px; 
-      z-index: 1000; 
+      z-index: 9999; 
       font-family: var(--font-family); 
     }
     
@@ -334,21 +334,7 @@
     #chat-window.chat-visible:hover { opacity: 1; }
 
     /* Mobile Responsive Tweaks */
-    @media (max-width: 480px) {
-        #chat-window {
-            width: 90vw;
-            right: -10px; /* Slight offset compensation or just 0 */
-            /* We want 90vw width. Container is at right: 20px. 
-               If we set right: -10px, it shifts right.
-               Let's try to center it relative to screen.
-               Since container is fixed at bottom-right, better to use fixed positioning for window on mobile?
-               Or just adjust size.
-            */
-            width: 85vw; /* Safer width */
-            height: 70vh;
-            right: 0;
-        }
-    }
+    /* Handled in main mobile query at bottom */
 
     /* Header */
     .chat-header { 
@@ -591,44 +577,119 @@
     }
     #msg-send-btn:hover { transform: scale(1.1); color: var(--primary-hover); }
 
-    /* Call Notification Popup (Top of Chat) */
+    /* Call Notification Popup (Centered Overlay) */
     .call-popup {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      right: 10px;
-      background: rgba(255,255,255,0.95);
-      backdrop-filter: blur(10px);
-      padding: 12px 15px;
-      border-radius: 12px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-      z-index: 10;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.8); /* Dark overlay */
+      z-index: 10000;
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
-      transform: translateY(-150%);
-      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      border: 1px solid rgba(0,0,0,0.05);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease;
+      backdrop-filter: blur(5px);
     }
-    .call-popup.active { transform: translateY(0); }
-    .call-info { display: flex; align-items: center; gap: 10px; }
-    .call-avatar { width: 36px; height: 36px; background: var(--accent-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
-    .call-text-group { display: flex; flex-direction: column; }
-    .call-name { font-weight: 600; font-size: 14px; }
-    .call-status { font-size: 11px; color: var(--text-light); animation: pulse 1.5s infinite; }
+    .call-popup.active { opacity: 1; visibility: visible; }
     
-    .call-actions { display: flex; gap: 8px; }
-    .btn-call-accept { width: 36px; height: 36px; border-radius: 50%; background: #22c55e; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; font-size: 14px; }
-    .btn-call-decline { width: 36px; height: 36px; border-radius: 50%; background: #ef4444; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; font-size: 14px; }
+    .call-popup-card {
+        background: white;
+        padding: 25px;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        width: 90%;
+        max-width: 320px;
+        transform: scale(0.9);
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .call-popup.active .call-popup-card { transform: scale(1); }
+    
+    .call-info { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .call-avatar { 
+        width: 80px; 
+        height: 80px; 
+        background: var(--accent-color); 
+        color: white; 
+        border-radius: 50%; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        font-size: 32px; 
+        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+        animation: pulse-ring 2s infinite;
+    }
+    .call-text-group { display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .call-name { font-weight: 700; font-size: 20px; color: #111827; }
+    .call-status { font-size: 14px; color: #6b7280; margin-top: 4px; animation: pulse 1.5s infinite; }
+    
+    .call-actions { display: flex; gap: 20px; width: 100%; justify-content: center; }
+    .btn-call-accept { 
+        width: 60px; 
+        height: 60px; 
+        border-radius: 50%; 
+        background: #22c55e; 
+        color: white; 
+        border: none; 
+        cursor: pointer; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        font-size: 24px; 
+        transition: transform 0.2s; 
+        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+    }
+    .btn-call-decline { 
+        width: 60px; 
+        height: 60px; 
+        border-radius: 50%; 
+        background: #ef4444; 
+        color: white; 
+        border: none; 
+        cursor: pointer; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        font-size: 24px; 
+        transition: transform 0.2s; 
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    }
     .btn-call-accept:hover, .btn-call-decline:hover { transform: scale(1.1); }
     
     @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
 
     /* Mobile Responsive */
     @media (max-width: 480px) {
-      #chat-window { width: 100vw; height: 100vh; bottom: 0; right: 0; border-radius: 0; }
-      #chat-widget-container { bottom: 0; right: 0; z-index: 9999; }
-      #chat-toggle-btn { bottom: 20px; right: 20px; position: fixed; }
+      /* Chat Widget Container: respect safe area */
+      #chat-widget-container {
+        right: 20px;
+        bottom: calc(20px + env(safe-area-inset-bottom));
+        z-index: 9999;
+      }
+
+      /* Chat Window: 90vw width, centered relative to screen */
+      #chat-window {
+        width: 90vw;
+        height: 70vh;
+        position: fixed; /* Fixed relative to viewport */
+        bottom: calc(90px + env(safe-area-inset-bottom)); /* Above toggle button */
+        right: 5vw;
+        left: 5vw;
+        border-radius: 16px;
+        transform-origin: bottom center;
+      }
+
+      /* Ensure visible state handles transform correctly */
+      #chat-window.chat-visible {
+        transform: translateY(0) scale(1);
+      }
     }
   </style>
 </head>
@@ -905,27 +966,23 @@
       <!-- Loader -->
       <div id="chat-loader-spinner" class="spinner" style="display: none; width: 30px; height: 30px; border-width: 3px; margin: 20px auto;"></div>
 
-      <!-- Call Popup (Absolute inside Chat Window) -->
-      <div id="call-popup" class="call-popup">
-         <div class="call-info">
-           <div class="call-avatar"><i class="fas fa-phone"></i></div>
-           <div class="call-text-group">
-             <span id="call-from-name" class="call-name">User</span>
-             <span class="call-status">Incoming call...</span>
-           </div>
-         </div>
-         <div class="call-actions">
-           <button id="btn-accept" class="btn-call-accept"><i class="fas fa-phone"></i></button>
-           <button id="btn-decline" class="btn-call-decline"><i class="fas fa-times"></i></button>
-         </div>
-      </div>
-
       <!-- Auth UI -->
       <div id="auth-ui"> 
-          <h3 style="text-align: center; margin-bottom: 10px;">Welcome</h3>
-          <input type="email" id="email-input" class="chat-input-auth" placeholder="Email"> 
-          <input type="password" id="pass-input" class="chat-input-auth" placeholder="Password"> 
-          <button id="login-btn">Login</button> 
+          <div id="login-form" style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+              <h3 style="text-align: center; margin-bottom: 10px;">Добро пожаловать</h3>
+              <p style="text-align: center; font-size: 0.9rem; color: #666; margin-bottom: 15px;">Введите ваше имя, чтобы начать общение</p>
+              <input type="text" id="username-input" class="chat-input-auth" placeholder="Ваше имя (Никнейм)" maxlength="15"> 
+              <button id="login-btn">Войти в чат</button> 
+          </div>
+          <div id="login-confirm" style="display: none; flex-direction: column; gap: 15px; width: 100%; text-align: center;">
+               <h3 style="text-align: center;">Проверка имени</h3>
+               <p style="color: #4b5563; margin: 0;">Вы хотите, чтобы к Вам обращались:</p>
+               <div style="font-size: 1.4rem; font-weight: bold; color: var(--primary-color); margin: 5px 0;" id="confirm-name-display"></div>
+               <div style="display: flex; gap: 10px; justify-content: center; margin-top: 10px;">
+                   <button id="confirm-no-btn" style="flex: 1; padding: 10px; background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; border-radius: 10px; cursor: pointer; font-size: 14px;">Изменить</button>
+                   <button id="confirm-yes-btn" style="flex: 1; padding: 10px; background: var(--primary-color); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 14px;">Да, всё верно</button>
+               </div>
+          </div>
       </div> 
       
       <!-- App Content -->
@@ -957,6 +1014,23 @@
 
       </div>
     </div>
+  </div>
+
+  <!-- Call Popup (Global Overlay) -->
+  <div id="call-popup" class="call-popup">
+     <div class="call-popup-card">
+         <div class="call-info">
+           <div class="call-avatar"><i class="fas fa-phone"></i></div>
+           <div class="call-text-group">
+             <span id="call-from-name" class="call-name">User</span>
+             <span class="call-status">Входящий звонок...</span>
+           </div>
+         </div>
+         <div class="call-actions">
+           <button id="btn-decline" class="btn-call-decline"><i class="fas fa-phone-slash"></i></button>
+           <button id="btn-accept" class="btn-call-accept"><i class="fas fa-phone"></i></button>
+         </div>
+     </div>
   </div>
 
   <script type="module" src="voice-chat.js"></script>
